@@ -208,7 +208,7 @@ def tf_gen_op_wrapper_py(name, out=None, hidden=[], visibility=None, deps=[],
       name=name + "_pygenrule",
       outs=[out],
       tools=[tool_name],
-      cmd=("$(location " + tool_name + ") " + ",".join(hidden)
+      cmd=("export LD_LIBRARY_PATH=/opt/gcc/4.9.3/snos/lib64/ && $(location " + tool_name + ") " + ",".join(hidden)
            + " " + ("1" if require_shape_functions else "0") + " > $@"))
 
   # Make a py_library out of the generated python file.
@@ -627,13 +627,14 @@ def tf_generate_proto_text_sources(name, srcs_relative_dir, srcs):
         name = name,
         srcs = srcs,
         outs = out_hdrs + out_srcs,
-        cmd = "$(location //tensorflow/tools/proto_text:gen_proto_text_functions) " +
+        cmd = "export LD_LIBRARY_PATH=/opt/gcc/5.3.0/snos/lib64 && $(location //tensorflow/tools/proto_text:gen_proto_text_functions) " +
               "$(@D) " + srcs_relative_dir + " $(SRCS)",
         tools = ["//tensorflow/tools/proto_text:gen_proto_text_functions"],
     )
   return struct(hdrs=out_hdrs, srcs=out_srcs)
 
 def tf_genrule_cmd_append_to_srcs(to_append):
-    return ("cat $(SRCS) > $(@) && " +
+    return ("export LD_LIBRARY_PATH=/opt/gcc/5.3.0/snos/lib64 && cat $(SRCS) > $(@) && " +
+            "echo export LD_LIBRARY_PATH=/opt/gcc/5.3.0/snos/lib64 >> $(@) && "  +
             "echo >> $(@) && " +
             "echo " + to_append + " >> $(@)")
